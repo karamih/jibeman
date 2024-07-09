@@ -37,6 +37,19 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     'rest_framework',
+    'django_jalali',
+
+    'admin_user',
+    'admin_notification',
+
+    'client_user',
+    'client_account',
+    'client_source',
+    'client_transaction',
+    'client_subscription',
+    'client_category',
+    'client_budget',
+    'client_ticket'
 ]
 
 MIDDLEWARE = [
@@ -83,7 +96,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -111,8 +123,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = 'client_user.UserModel'
