@@ -14,14 +14,15 @@ class FinancialSourceModel(models.Model):
 
     card_number_validator = RegexValidator(
         regex=r'^\d{16}$',
-        message="Card number must be exactly 16 digits."
+        message="شماره کارت بایستی 16 رقم باشد."
     )
 
     account = models.ForeignKey(
         to=AccountModel,
         related_name='financial_sources',
         verbose_name='account',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=30)
     type = models.CharField(max_length=4, choices=FinancialSourceType)
     card_number = models.CharField(blank=True, null=True, validators=[card_number_validator])
@@ -42,9 +43,19 @@ class FinancialSourceModel(models.Model):
     def clean(self):
         super().clean()
         if self.type == 'Card' and not self.card_number:
-            raise ValidationError({'card_number': 'Card number is required when the type is Card.'})
+            raise ValidationError({'card_number': 'وقتی منبع مالی کارت بانکی است، شماره کارت الزامی است.'})
         elif self.type != 'Card' and self.card_number:
-            raise ValidationError({'card_number': 'Card number is unavailable when the type is Cash.'})
+            raise ValidationError({'card_number': 'وقتی منبع مالی پول نقد است، شماره کارت نباید ارسال شود.'})
+
+        name_exists = FinancialSourceModel.objects.filter(name=self.name, account=self.account).exclude(
+            id=self.id).exists()
+        if name_exists:
+            raise ValidationError({'name': 'منبع مالی با این نام برای این حساب از قبل وجود دارد.'})
+
+        card_exists = FinancialSourceModel.objects.filter(card_number=self.card_number, account=self.account).exclude(
+            id=self.id).exists()
+        if self.card_number and card_exists:
+            raise ValidationError({'card_number': 'منبع مالی با این شماره کارت برای این حساب از قبل وجود دارد.'})
 
     def save(self, *args, **kwargs):
         self.clean()

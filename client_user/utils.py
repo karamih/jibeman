@@ -1,6 +1,5 @@
 import random
 from ippanel import Client
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 from .models import TOTPModel
@@ -21,7 +20,7 @@ def generate_and_send_totp(phone_number):
 
 
 def send_sms(phone_number, totp_code):
-    api_key = 'qdIm-goySMswf_QsTgzHOzmWExrdY4dfKx5JYtc51g0='
+    api_key = 'U1XDtYsrczPs6DNPyuBVCrMIe2iAA9b5L9Mel8JIrHQ='
     sms = Client(api_key)
 
     pattern_values = {
@@ -29,7 +28,7 @@ def send_sms(phone_number, totp_code):
     }
     try:
         sms.send_pattern(
-            "53dvcpuk6bvslyw",
+            "eskdg5s6vd5f70a",
             "+983000505",
             phone_number,
             pattern_values,

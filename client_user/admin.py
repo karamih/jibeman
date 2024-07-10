@@ -18,6 +18,7 @@ class ProfileModelAdmin(admin.ModelAdmin):
     list_filter = ['currency_unit']
     ordering = ['user__phone_number']
     readonly_fields = ['created_time']
+    ordering = ['-created_time']
 
 
 @admin.register(TOTPModel)
@@ -26,3 +27,4 @@ class TotpModelAdmin(admin.ModelAdmin):
     search_fields = ['phone_number']
     list_filter = ['is_verified', 'created_time']
     readonly_fields = ['created_time']
+    ordering = ['-created_time']

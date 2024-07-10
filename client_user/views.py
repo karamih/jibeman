@@ -3,8 +3,9 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from .serializers import PhoneNumberSerializer, OtpVerificationSerializer
-from .models import UserModel, ProfileModel, TOTPModel
 from .utils import generate_and_send_totp
+from .models import UserModel
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class GenerateOtpView(APIView):
@@ -24,18 +25,17 @@ class VerifyOtpView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = OtpVerificationSerializer(data=request.data)
         if serializer.is_valid():
+            response_data = serializer.save()
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MockAuthentication(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PhoneNumberSerializer(data=request.data)
+        if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
-            otp_code = serializer.validated_data['otp']
-            user_otp_instance = TOTPModel.objects.get(phone_number=phone_number)
-            if user_otp_instance.is_valid():
-                if user_otp_instance.otp == otp_code:
-                    user_otp_instance.is_verified = True
-
-                    user = UserModel.objects.create_user(phone_number=phone_number)
-                    ProfileModel.objects.create(user=user)
-
-                    return Response({"detail": "کاربر با موفقیت ایجاد شد."}, status=status.HTTP_201_CREATED)
-                return Response({"detail": "کد ارسال شده اشتباه وارد شده است."}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"detail": "زمان استفاده از این کد به پایان رسیده است."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            user, created = UserModel.objects.get_or_create(phone_number=phone_number)
+            refresh = RefreshToken.for_user(user)
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

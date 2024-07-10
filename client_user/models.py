@@ -10,7 +10,7 @@ from django_jalali.db import models as jmodels
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
-            raise ValueError('The Phone Number field must be set')
+            raise ValueError('شماره تلفن الزامی است.')
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -34,7 +34,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         max_length=11,
         unique=True,
         validators=[RegexValidator(regex=r'^09\d{9}$',
-                                   message="Phone number must be entered in the format: '09xxxxxxxxx'. Exactly 11 digits allowed.")]
+                                   message="شماره تلفن باید 11 رقم و به فرمت 09xxxxxxxxx باشد.")]
     )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

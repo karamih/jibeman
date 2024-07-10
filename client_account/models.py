@@ -20,6 +20,7 @@ class AccountModel(models.Model):
         db_table = 'accounts'
         verbose_name = 'Account'
         verbose_name_plural = 'Accounts'
+        unique_together = ('profile', 'name')
 
     def update_credit(self):
         total_credit = self.financial_sources.filter(is_calculate=True).aggregate(models.Sum('remain'))[
