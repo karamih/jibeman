@@ -10,10 +10,7 @@ class AccountListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        profile = ProfileModel.objects.filter(user=self.request.user).first()
-        if not profile:
-            raise ValidationError("پروفایلی برای کاربر کنونی وجود ندارد.")
-
+        profile = ProfileModel.objects.get(user=self.request.user)
         try:
             serializer.save(profile=profile)
         except IntegrityError:

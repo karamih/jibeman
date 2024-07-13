@@ -35,5 +35,5 @@ class CategoryModel(models.Model):
 
     def delete(self, *args, **kwargs):
         if self.is_default:
-            raise ValidationError("Default categories cannot be deleted unless they are set to non-default.")
+            raise ValidationError("دسته بندی پیش فرض قابل حذف نمی باشد.")
         super().delete(*args, **kwargs)

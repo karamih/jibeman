@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="AccountModel",
+            name="DefaultCategoryModel",
             fields=[
                 (
                     "id",
@@ -24,8 +24,18 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("name", models.CharField(max_length=30)),
-                ("credit", models.BigIntegerField(default=0)),
-                ("is_active", models.BooleanField(default=True)),
+                (
+                    "transaction_type",
+                    models.CharField(
+                        choices=[
+                            ("Income", "Income"),
+                            ("Expense", "Expense"),
+                            ("Transfer", "Transfer"),
+                        ],
+                        max_length=8,
+                    ),
+                ),
+                ("is_default", models.BooleanField(default=True)),
                 (
                     "created_time",
                     django_jalali.db.models.jDateTimeField(auto_now_add=True),
@@ -33,9 +43,10 @@ class Migration(migrations.Migration):
                 ("updated_time", django_jalali.db.models.jDateTimeField(auto_now=True)),
             ],
             options={
-                "verbose_name": "Account",
-                "verbose_name_plural": "Accounts",
-                "db_table": "accounts",
+                "verbose_name": "Default Category",
+                "verbose_name_plural": "Default Categories",
+                "db_table": "default_category",
+                "unique_together": {("name", "transaction_type", "is_default")},
             },
         ),
     ]

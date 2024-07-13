@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class UserConfig(AppConfig):
+class AdminCategoryConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "client_user"
+    name = "admin_category"

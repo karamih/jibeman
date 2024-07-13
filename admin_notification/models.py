@@ -1,6 +1,6 @@
 from django.db import models
 from django_jalali.db import models as jmodels
-from client_user.models import ProfileModel
+from client_auth.models import ProfileModel
 
 
 class NotificationModel(models.Model):
