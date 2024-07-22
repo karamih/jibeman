@@ -1,5 +1,5 @@
 from django.contrib.auth.backends import BaseBackend
-from ..models import AdminUserModel
+from admin_auth.models import AdminUserModel
 
 
 class AdminUserBackend(BaseBackend):

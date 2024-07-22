@@ -1,12 +1,14 @@
+import secrets
+import logging
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.validators import ValidationError
-from .serializers import PhoneNumberSerializer, OtpVerificationSerializer
-from .utils import generate_and_send_totp
-from .models import UserModel, ProfileModel
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+from .serializers import PhoneNumberSerializer, OtpVerificationSerializer, CustomTokenRefreshSerializer, MockSerializer
+from utils.otp import generate_and_send_totp
+from .models import UserModel, ProfileModel, SessionModel
 
 
 class GenerateOtpView(APIView):
@@ -33,24 +35,45 @@ class VerifyOtpView(APIView):
 
 class MockAuthentication(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = PhoneNumberSerializer(data=request.data)
+        serializer = MockSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 with transaction.atomic():
                     phone_number = serializer.validated_data['phone_number']
+                    fcm_token = serializer.validated_data['fcm_token']
                     user, created = UserModel.objects.get_or_create(phone_number=phone_number)
                     if created:
                         ProfileModel.objects.create(user=user)
 
+                    if fcm_token and user.fcm_token != fcm_token:
+                        user.fcm_token = fcm_token
+                        user.save()
+
+                    logging.info(f"Deleting tokens for user: {user}")
+
+                    logging.info(f"Tokens deleted for user: {user}")
+
+                    SessionModel.objects.filter(user=user).delete()
+
+                    session_key = secrets.token_hex(15)
+                    SessionModel.objects.create(user=user, session_key=session_key)
+
                     refresh = RefreshToken.for_user(user)
-                    access_token = str(refresh.access_token)
+                    refresh['session_key'] = session_key
+                    access_token = refresh.access_token
+                    access_token['session_key'] = session_key
 
                     response_data = {
                         "detail": "کاربر با موفقیت وارد شد." if not created else "کاربر با موفقیت ایجاد شد.",
                         "refresh": str(refresh),
-                        "access": access_token
+                        "access": str(access_token)
                     }
                     return Response(response_data, status=status.HTTP_200_OK)
             except Exception as e:
+                logging.error(f"Exception during user login or creation: {e}")
                 return Response('خطا در ورود یا ایجاد کاربر', status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer

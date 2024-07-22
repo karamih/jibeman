@@ -2,7 +2,7 @@ from rest_framework import generics
 from .models import DefaultCategoryModel
 from .serializers import DefaultCategorySerializer
 
-from admin_auth.utils.admin_permission import IsSuperAdmin
+from utils.admin_permission import IsSuperAdmin
 
 
 class DefaultCategoryListCreateView(generics.ListCreateAPIView):

@@ -5,14 +5,14 @@ from .models import Ticket
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('subject', 'user', 'created_time', 'status', 'answered_time')
+    list_display = ('id', 'subject', 'user', 'created_time', 'status', 'is_visited', 'answered_time')
     list_filter = ('status', 'created_time', 'answered_time')
     search_fields = ('subject', 'user__username', 'description', 'answer')
     readonly_fields = ('created_time', 'answered_time')
 
     fieldsets = (
         (None, {
-            'fields': ('subject', 'description', 'user', 'status')
+            'fields': ('subject', 'description', 'user', 'status', 'is_visited')
         }),
         ('Images', {
             'fields': ('image1', 'image2', 'image3')

@@ -11,7 +11,7 @@ class FinancialSourceSerializer(serializers.ModelSerializer):
         model = FinancialSourceModel
         fields = ['id', 'name', 'type', 'card_number', 'is_calculate', 'is_enable', 'remain', 'created_time',
                   'updated_time', 'account']
-        read_only_fields = ['id', 'remain', 'created_time', 'updated_time']
+        read_only_fields = ['id', 'created_time', 'updated_time']
 
     def validate(self, data):
         card_number = data.get('card_number')

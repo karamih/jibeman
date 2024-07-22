@@ -6,11 +6,10 @@ class DefaultCategoryModel(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('Income', 'Income'),
         ('Expense', 'Expense'),
-        ('Transfer', 'Transfer'),
     ]
 
     name = models.CharField(max_length=30)
-    transaction_type = models.CharField(max_length=8, choices=TRANSACTION_TYPE_CHOICES)
+    transaction_type = models.CharField(max_length=7, choices=TRANSACTION_TYPE_CHOICES)
     is_default = models.BooleanField(default=True)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
     updated_time = jmodels.jDateTimeField(auto_now=True)

@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from ..models import AdminUserModel
+from admin_auth.models import AdminUserModel
 
 
 class IsSuperAdmin(permissions.BasePermission):

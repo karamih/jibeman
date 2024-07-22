@@ -20,10 +20,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_jalali',
     'rest_framework_simplejwt',
+    'django_filters',
 
     'admin_auth',
+    'admin_user',
     'admin_notification',
     'admin_category',
+    'admin_ticket',
 
     'client_auth',
     'client_account',
@@ -43,7 +46,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'client_auth.middlewares.JWTSessionValidationMiddleware'
 ]
+
 
 ROOT_URLCONF = "app.urls"
 
@@ -80,7 +86,7 @@ AUTH_USER_MODEL = 'client_auth.UserModel'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'admin_auth.utils.admin_auth_backend.AdminUserBackend',
+    'utils.admin_auth_backend.AdminUserBackend',
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -109,10 +115,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ],
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,

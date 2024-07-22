@@ -36,9 +36,11 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         validators=[RegexValidator(regex=r'^09\d{9}$',
                                    message="شماره تلفن باید 11 رقم و به فرمت 09xxxxxxxxx باشد.")]
     )
+    fcm_token = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+
     groups = models.ManyToManyField(
         Group,
         related_name='client_users',
@@ -94,39 +96,28 @@ class TOTPModel(models.Model):
         validators=[RegexValidator(regex=r'^09\d{9}$',
                                    message="شماره تلفن باید 11 رقم و به فرمت 09xxxxxxxxx باشد.")]
     )
-    otp = models.CharField(max_length=6)
+    otp = models.CharField(
+        max_length=6,
+        validators=[RegexValidator(regex=r'^\d{6}$',
+                                   message="کد عددی صحت شماره تلفن باید 6 رقم باشد.")])
     created_time = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'totp'
+        verbose_name = 'Totp'
+        verbose_name_plural = 'Totp\'s'
 
     def is_valid(self):
         return not self.is_verified and timezone.now() < self.created_time + timedelta(
             minutes=3)
 
-# class DeviceModel(models.Model):
-#     profile = models.ForeignKey(ProfileModel, related_name='devices', on_delete=models.CASCADE)
-#     device_name = models.CharField(max_length=100)
-#     device_type = models.CharField(max_length=50)
-#     last_active = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         db_table = 'device'
-#         verbose_name = 'Device'
-#         verbose_name_plural = 'Devices'
-#
-#     def __str__(self):
-#         return f"{self.device_name} ({self.device_type})"
-#
-#
-# class SessionModel(models.Model):
-#     device = models.ForeignKey(DeviceModel, related_name='sessions', on_delete=models.CASCADE)
-#     token = models.CharField(max_length=255)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     expires_at = models.DateTimeField()
-#
-#     class Meta:
-#         db_table = 'session'
-#         verbose_name = 'Session'
-#         verbose_name_plural = 'Sessions'
-#
-#     def __str__(self):
-#         return f"Session for {self.device.device_name} ({self.device.device_type})"
+
+class SessionModel(models.Model):
+    user = models.OneToOneField(UserModel, related_name='session', on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=30, primary_key=True)
+
+    class Meta:
+        db_table = 'user_sessions'
+        verbose_name = 'User session'
+        verbose_name_plural = 'User sessions'

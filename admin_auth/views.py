@@ -6,7 +6,7 @@ from rest_framework import status
 from .serializers import AdminUserRegistrationSerializer
 from .serializers import AdminUserLoginSerializer
 from .models import AdminUserModel
-from .utils.admin_permission import IsSuperAdmin
+from utils.admin_permission import IsSuperAdmin
 
 
 class AdminUserRegisterView(generics.ListCreateAPIView):

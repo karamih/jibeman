@@ -1,7 +1,6 @@
 from django.urls import path
 
-from .views import GenerateOtpView, VerifyOtpView, MockAuthentication
-from rest_framework_simplejwt.views import TokenRefreshView
+from .views import GenerateOtpView, VerifyOtpView, MockAuthentication, CustomTokenRefreshView
 
 
 urlpatterns = [
@@ -9,5 +8,5 @@ urlpatterns = [
     path('otp/verify', VerifyOtpView.as_view(), name='verify-otp'),
     path('mock', MockAuthentication.as_view()),
 
-    path('RefreshToken', TokenRefreshView.as_view(), name='token_refresh'),
+    path('RefreshToken', CustomTokenRefreshView.as_view(), name='token_refresh'),
 ]

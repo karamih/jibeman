@@ -1,4 +1,6 @@
+import jdatetime
 from django.db import models
+from django.utils import timezone
 from django_jalali.db import models as jmodels
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -24,10 +26,11 @@ class Ticket(models.Model):
     image1 = models.ImageField(upload_to='ticket_images/', blank=True, null=True, validators=[validate_image])
     image2 = models.ImageField(upload_to='ticket_images/', blank=True, null=True, validators=[validate_image])
     image3 = models.ImageField(upload_to='ticket_images/', blank=True, null=True, validators=[validate_image])
-    created_time = jmodels.jDateTimeField(auto_now_add=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending')
+    is_visited = models.BooleanField(default=False)
     answer = models.TextField(blank=True, null=True)
     answered_time = jmodels.jDateTimeField(blank=True, null=True)
+    created_time = jmodels.jDateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'ticket'
@@ -39,6 +42,8 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         if self.answer:
-            self.answered_time = jmodels.datetime.datetime.now()
+            gregorian_now = jdatetime.datetime.now().togregorian()
+            aware_gregorian_now = timezone.make_aware(gregorian_now, timezone.get_current_timezone())
+            self.answered_time = aware_gregorian_now
             self.status = 'answered'
         super().save(*args, **kwargs)

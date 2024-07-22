@@ -28,7 +28,7 @@ class FinancialSourceModel(models.Model):
     card_number = models.CharField(blank=True, null=True, validators=[card_number_validator])
     is_calculate = models.BooleanField(default=True)
     is_enable = models.BooleanField(default=True)
-    remain = models.IntegerField(default=0)
+    remain = models.PositiveBigIntegerField(default=0)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
     updated_time = jmodels.jDateTimeField(auto_now=True)
 
@@ -36,6 +36,12 @@ class FinancialSourceModel(models.Model):
         db_table = 'financial source'
         verbose_name = 'Financial Source'
         verbose_name_plural = 'Financial Sources'
+        constraints = [
+            models.UniqueConstraint(fields=['account', 'name'], name='unique_account_name',
+                                    violation_error_message='منبع مالی با این نام برای این جساب موجود است.'),
+            models.UniqueConstraint(fields=['account', 'card_number'], name='unique_account_card_number',
+                                    violation_error_message='منبع مالی با این شماره کارت برای این جساب موجود است.')
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.get_type_display()})"
@@ -47,15 +53,13 @@ class FinancialSourceModel(models.Model):
         elif self.type != 'Card' and self.card_number:
             raise ValidationError({'card_number': 'وقتی منبع مالی پول نقد است، شماره کارت نباید ارسال شود.'})
 
-        name_exists = FinancialSourceModel.objects.filter(name=self.name, account=self.account).exclude(
-            id=self.id).exists()
-        if name_exists:
-            raise ValidationError({'name': 'منبع مالی با این نام برای این حساب از قبل وجود دارد.'})
-
-        card_exists = FinancialSourceModel.objects.filter(card_number=self.card_number, account=self.account).exclude(
-            id=self.id).exists()
-        if self.card_number and card_exists:
-            raise ValidationError({'card_number': 'منبع مالی با این شماره کارت برای این حساب از قبل وجود دارد.'})
+    def update_credit(self):
+        total_income = self.transaction.filter(transaction_type='Income').aggregate(models.Sum('amount'))[
+                           'amount__sum'] or 0
+        total_expense = self.transaction.filter(transaction_type='Expense').aggregate(models.Sum('amount'))[
+                           'amount__sum'] or 0
+        self.remain = total_income - total_expense
+        self.save()
 
     def save(self, *args, **kwargs):
         self.clean()

@@ -1,10 +1,12 @@
-from rest_framework_simplejwt.tokens import RefreshToken
+import secrets
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from .models import AdminUserModel
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from client_auth.models import SessionModel
+from .models import AdminUserModel
 
 User = get_user_model()
 
@@ -77,11 +79,19 @@ class AdminUserLoginSerializer(serializers.Serializer):
         if not admin_user.is_active:
             raise serializers.ValidationError("این حساب کاربری فعال نیست.")
 
-        refresh = RefreshToken.for_user(admin_user.user)
+        SessionModel.objects.filter(user=admin_user.user).delete()
+
+        session_key = secrets.token_hex(15)
+        SessionModel.objects.create(user=admin_user.user, session_key=session_key)
+
+        refresh = RefreshToken.for_user(admin_user)
+        refresh['session_key'] = session_key
+        access_token = refresh.access_token
+        access_token['session_key'] = session_key
 
         data = {
             'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'access': str(access_token),
             'username': admin_user.username,
             'role': 'super user' if admin_user.is_superuser else 'staff'
         }
