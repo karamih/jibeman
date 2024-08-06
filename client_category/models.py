@@ -9,7 +9,6 @@ class CategoryModel(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('Income', 'Income'),
         ('Expense', 'Expense'),
-        ('Transfer', 'Transfer'),
     ]
 
     account = models.ForeignKey(
@@ -19,13 +18,16 @@ class CategoryModel(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(max_length=30)
+    icon_name = models.CharField(max_length=30)
     transaction_type = models.CharField(max_length=8, choices=TRANSACTION_TYPE_CHOICES)
+    icon_fg_color = models.CharField(max_length=6)
+    icon_bg_color = models.CharField(max_length=6)
     is_default = models.BooleanField(default=False)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
     updated_time = jmodels.jDateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'category'
+        db_table = 'categories'
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         unique_together = ('account', 'name', 'transaction_type')

@@ -6,16 +6,15 @@ from client_auth.models import ProfileModel
 class NotificationModel(models.Model):
     profile = models.ForeignKey(to=ProfileModel, related_name='notifications', verbose_name='profile',
                                 on_delete=models.CASCADE)
-    notification = models.CharField(max_length=1000)
-    is_read = models.BooleanField(default=False)
+    title = models.CharField(max_length=30)
+    message = models.CharField(max_length=100)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
+    expires_at = jmodels.jDateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = 'notification'
+        db_table = 'notifications'
         verbose_name = 'Notification'
         verbose_name_plural = 'Notifications'
 
     def __str__(self):
-        return f"Notification for {self.profile.user.phone_number}"
-
-
+        return self.title

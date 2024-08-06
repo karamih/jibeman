@@ -6,8 +6,7 @@ from django_filters import rest_framework as filters
 from .serializers import AdminUserListSerializer, AdminUserActiveSerializer
 from .filters import UserFilter
 from client_auth.models import UserModel
-from admin_auth.models import AdminUserModel
-from utils.admin_permission import IsAdmin, IsSuperAdmin
+from utils.admin_permission import IsSuperAdmin
 from utils.custom_pagination import CustomPagination
 
 

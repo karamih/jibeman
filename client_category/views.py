@@ -2,6 +2,8 @@ from rest_framework import generics, permissions
 from rest_framework.serializers import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
+from admin_category.models import DefaultCategoryModel
+from admin_category.serializers import DefaultCategoryListClientSerializer
 from .models import CategoryModel, AccountModel
 from .serializers import CategorySerializer
 
@@ -51,3 +53,9 @@ class CategoryRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "دسته بندی پیش فرض قابل حذف نمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListDefaultCategoryView(generics.ListAPIView):
+    queryset = DefaultCategoryModel.objects.all()
+    serializer_class = DefaultCategoryListClientSerializer
+    permission_classes = [permissions.IsAuthenticated]

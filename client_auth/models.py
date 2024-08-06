@@ -58,7 +58,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
-        db_table = 'user'
+        db_table = 'users'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
@@ -80,6 +80,7 @@ class ProfileModel(models.Model):
     user = models.OneToOneField(to=UserModel, related_name='profile', verbose_name='user', on_delete=models.CASCADE)
     currency_unit = models.CharField(max_length=5, choices=UNIT_CHOICES, default='Toman')
     created_time = jmodels.jDateTimeField(auto_now_add=True)
+    updated_time = jmodels.jDateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'profiles'
@@ -116,8 +117,9 @@ class TOTPModel(models.Model):
 class SessionModel(models.Model):
     user = models.OneToOneField(UserModel, related_name='session', on_delete=models.CASCADE)
     session_key = models.CharField(max_length=30, primary_key=True)
+    created_time = jmodels.jDateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'user_sessions'
-        verbose_name = 'User session'
-        verbose_name_plural = 'User sessions'
+        db_table = 'sessions'
+        verbose_name = 'Session'
+        verbose_name_plural = 'Sessions'

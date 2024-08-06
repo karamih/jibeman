@@ -42,7 +42,7 @@ class AdminUserModel(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
-        db_table = 'admin_user'
+        db_table = 'admin_users'
         verbose_name = 'Admin User'
         verbose_name_plural = 'Admin Users'
         unique_together = ['user', 'username']

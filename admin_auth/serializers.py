@@ -11,6 +11,14 @@ from .models import AdminUserModel
 User = get_user_model()
 
 
+class AdminUserProfileSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='user.phone_number')
+
+    class Meta:
+        model = AdminUserModel
+        fields = ['username', 'phone_number', 'is_staff', 'is_superuser', 'created_time']
+
+
 class AdminUserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
@@ -92,8 +100,76 @@ class AdminUserLoginSerializer(serializers.Serializer):
         data = {
             'refresh': str(refresh),
             'access': str(access_token),
-            'username': admin_user.username,
-            'role': 'super user' if admin_user.is_superuser else 'staff'
         }
 
         return data
+
+
+class AdminUpdateUsernameSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=30,
+        required=True,
+        error_messages={
+            'required': 'این نام کاربری الزامی است.',
+            'blank': 'این نام کاربری نمی‌تواند خالی باشد.',
+            'max_length': 'نام کاربری نباید بیشتر از 30 کاراکتر باشد.'
+        }
+    )
+
+    class Meta:
+        model = AdminUserModel
+        fields = ['username']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        new_username = data.get('username')
+
+        if 'username' not in data:
+            raise serializers.ValidationError({'username': 'این نام کاربری الزامی است.'})
+
+        if AdminUserModel.objects.filter(username=new_username).exists():
+            if user.admin_user.username == new_username:
+                raise serializers.ValidationError({'username': 'این نام کاربری، نام کاربری فعلی شما است.'})
+            else:
+                raise serializers.ValidationError({'username': 'این نام کاربری قبلا انتخاب شده است.'})
+        return data
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.save()
+        return instance
+
+
+class AdminUpdatePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True,
+                                         error_messages={'required': 'وارد کردن رمز عبور قدیمی اجباری است.',
+                                                         'blank': 'فیلد رمز عبور قدیمی نباید خالی باشد.'})
+    new_password = serializers.CharField(required=True, write_only=True,
+                                         error_messages={'required': 'وارد کردن رمز عبور جدید اجباری است.',
+                                                         'blank': 'فیلد رمز عبور جدید نباید خالی باشد.'})
+    confirm_password = serializers.CharField(required=True, write_only=True,
+                                             error_messages={'required': 'وارد کردن تکرار رمز عبور جدید اجباری است.',
+                                                             'blank': 'فیلد تکرار رمز عبور جدید نباید خالی باشد.'})
+
+    def validate(self, data):
+        user = self.context['request'].user
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        if not user.admin_user.check_password(old_password):
+            raise serializers.ValidationError({'old password': 'رمز عبور شما اشتباه است.'})
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError({'confirm password': 'رمز عبور جدید را تکرار کنید.'})
+
+        if new_password == old_password:
+            raise serializers.ValidationError({'new password': 'رمز عبور جدید باید متفاوت از رمز عبور قبلی باشد.'})
+
+        return data
+
+    def save(self, **kwargs):
+        user = self.context['request'].user.admin_user
+        new_password = self.validated_data['new_password']
+        user.set_password(new_password)
+        user.save()

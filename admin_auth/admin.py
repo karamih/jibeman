@@ -9,8 +9,8 @@ class AdminUserAdmin(BaseUserAdmin):
     form = AdminUserChangeForm
     add_form = AdminUserCreationForm
 
-    list_display = ('user', 'username', 'is_active', 'is_staff', 'is_superuser', 'created_time', 'updated_time')
-    readonly_fields = ('created_time', 'updated_time')
+    list_display = ('id', 'user', 'username', 'is_active', 'is_staff', 'is_superuser', 'created_time', 'updated_time')
+    readonly_fields = ('id', 'created_time', 'updated_time')
     list_filter = ('is_superuser', 'is_staff', 'is_active')
 
     fieldsets = (

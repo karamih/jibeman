@@ -33,7 +33,7 @@ class FinancialSourceModel(models.Model):
     updated_time = jmodels.jDateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'financial source'
+        db_table = 'sources'
         verbose_name = 'Financial Source'
         verbose_name_plural = 'Financial Sources'
         constraints = [

@@ -21,12 +21,14 @@ INSTALLED_APPS = [
     'django_jalali',
     'rest_framework_simplejwt',
     'django_filters',
+    'corsheaders',
 
     'admin_auth',
     'admin_user',
     'admin_notification',
     'admin_category',
     'admin_ticket',
+    'admin_bank',
 
     'client_auth',
     'client_account',
@@ -35,12 +37,14 @@ INSTALLED_APPS = [
     'client_subscription',
     'client_category',
     'client_budget',
-    'client_ticket'
+    'client_ticket',
+    'client_notification'
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -50,6 +54,28 @@ MIDDLEWARE = [
     'client_auth.middlewares.JWTSessionValidationMiddleware'
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS"
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 ROOT_URLCONF = "app.urls"
 

@@ -40,7 +40,7 @@ class TransactionModel(models.Model):
     created_time = jmodels.jDateField(auto_now_add=True)
 
     class Meta:
-        db_table = 'transaction'
+        db_table = 'transactions'
         verbose_name = 'Transaction'
         verbose_name_plural = 'Transactions'
 

@@ -33,7 +33,7 @@ class Ticket(models.Model):
     created_time = jmodels.jDateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'ticket'
+        db_table = 'tickets'
         verbose_name = 'Ticket'
         verbose_name_plural = 'Tickets'
 

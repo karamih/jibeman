@@ -38,7 +38,7 @@ class BudgetModel(models.Model):
     is_closed = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'budget'
+        db_table = 'budgets'
         verbose_name = 'Budget'
         verbose_name_plural = 'Budgets'
         unique_together = ['account', 'name', 'category', 'cycle_start_date']

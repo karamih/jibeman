@@ -3,11 +3,12 @@ from .models import DefaultCategoryModel
 
 
 class DefaultCategorySerializer(serializers.ModelSerializer):
-    is_default = serializers.BooleanField(default=True)
+    is_default = serializers.BooleanField(default=False)
 
     class Meta:
         model = DefaultCategoryModel
-        fields = ['id', 'name', 'transaction_type', 'is_default', 'created_time', 'updated_time']
+        fields = ['id', 'name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default', 'created_time',
+                  'updated_time']
         read_only_fields = ['id', 'created_time', 'updated_time']
 
     def validate(self, data):
@@ -25,3 +26,11 @@ class DefaultCategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'name': 'دسته بندی با این نام و نوع تراکنش موجود است.'})
 
         return data
+
+
+class DefaultCategoryListClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DefaultCategoryModel
+        fields = ['id', 'name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default', 'created_time',
+                  'updated_time']
+        read_only_fields = ['id', 'created_time', 'updated_time']
