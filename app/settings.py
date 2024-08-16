@@ -51,7 +51,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
-    'client_auth.middlewares.JWTSessionValidationMiddleware'
+    'utils.middlewares.JWTSessionValidationMiddleware'
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True

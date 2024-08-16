@@ -4,7 +4,7 @@ from django.utils.functional import SimpleLazyObject
 from rest_framework import status
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken
-from .models import SessionModel
+from client_auth.models import SessionModel
 
 UserModel = get_user_model()
 

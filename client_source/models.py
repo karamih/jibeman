@@ -26,9 +26,11 @@ class FinancialSourceModel(models.Model):
     name = models.CharField(max_length=30)
     type = models.CharField(max_length=4, choices=FinancialSourceType)
     card_number = models.CharField(blank=True, null=True, validators=[card_number_validator])
+    icon_name = models.CharField(blank=True, null=True, max_length=30)
+    icon_color = models.CharField(blank=True, null=True, max_length=6)
     is_calculate = models.BooleanField(default=True)
     is_enable = models.BooleanField(default=True)
-    remain = models.PositiveBigIntegerField(default=0)
+    remain = models.IntegerField(default=0)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
     updated_time = jmodels.jDateTimeField(auto_now=True)
 
@@ -38,9 +40,7 @@ class FinancialSourceModel(models.Model):
         verbose_name_plural = 'Financial Sources'
         constraints = [
             models.UniqueConstraint(fields=['account', 'name'], name='unique_account_name',
-                                    violation_error_message='منبع مالی با این نام برای این جساب موجود است.'),
-            models.UniqueConstraint(fields=['account', 'card_number'], name='unique_account_card_number',
-                                    violation_error_message='منبع مالی با این شماره کارت برای این جساب موجود است.')
+                                    violation_error_message='منبع مالی با این نام برای این جساب موجود است.')
         ]
 
     def __str__(self):
@@ -48,16 +48,26 @@ class FinancialSourceModel(models.Model):
 
     def clean(self):
         super().clean()
-        if self.type == 'Card' and not self.card_number:
-            raise ValidationError({'card_number': 'وقتی منبع مالی کارت بانکی است، شماره کارت الزامی است.'})
-        elif self.type != 'Card' and self.card_number:
-            raise ValidationError({'card_number': 'وقتی منبع مالی پول نقد است، شماره کارت نباید ارسال شود.'})
+        if self.type == 'Card':
+            if not self.card_number:
+                raise ValidationError({'card_number': 'وقتی منبع مالی کارت بانکی است، شماره کارت الزامی است.'})
+            elif self.icon_name:
+                raise ValidationError({'icon_name': 'وقتی منبع مالی کارت بانکی است، نام آیکون نباید ارسال شود.'})
+            elif self.icon_color:
+                raise ValidationError({'icon_color': 'وقتی منبع مالی کارت بانکی است، رنگ آیکون نباید ارسال شود.'})
+        elif self.type == 'Cash':
+            if self.card_number:
+                raise ValidationError({'card_number': 'وقتی منبع مالی پول نقد است، شماره کارت نباید ارسال شود.'})
+            elif not self.icon_name:
+                raise ValidationError({'icon_name': 'وقتی منبع مالی پول نقد است، نام آیکون الزامی است.'})
+            elif not self.icon_color:
+                raise ValidationError({'icon_color': 'وقتی منبع مالی پول نقد است، رنگ آیکون الزامی است.'})
 
     def update_credit(self):
         total_income = self.transaction.filter(transaction_type='Income').aggregate(models.Sum('amount'))[
                            'amount__sum'] or 0
         total_expense = self.transaction.filter(transaction_type='Expense').aggregate(models.Sum('amount'))[
-                           'amount__sum'] or 0
+                            'amount__sum'] or 0
         self.remain = total_income - total_expense
         self.save()
 

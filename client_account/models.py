@@ -11,7 +11,9 @@ class AccountModel(models.Model):
         on_delete=models.CASCADE
     )
     name = models.CharField(max_length=30)
-    credit = models.BigIntegerField(default=0)
+    icon_name = models.CharField(max_length=30)
+    icon_color = models.CharField(max_length=6)
+    credit = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_time = jmodels.jDateTimeField(auto_now_add=True)
     updated_time = jmodels.jDateTimeField(auto_now=True)
