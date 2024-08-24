@@ -102,10 +102,26 @@ class OtpVerificationSerializer(serializers.ModelSerializer):
                 return {
                     "detail": "کاربر با موفقیت وارد شد." if not created else "کاربر با موفقیت ایجاد شد.",
                     "refresh": str(refresh),
-                    "access": str(access_token)
+                    "access": str(access_token),
+                    "phone_number": str(phone_number),
+                    "currency_unit": str(user.profile.currency_unit),
+                    "created_time": str(user.profile.created_time),
+                    "updated_time": str(user.profile.updated_time)
                 }
         except Exception as e:
             raise ValidationError(f"خطا در ورود یا ایجاد کاربر: {e}")
+
+
+class UserProfileDateSerializer(serializers.ModelSerializer):
+    phone_number = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProfileModel
+        fields = ['phone_number', 'currency_unit', 'created_time', 'updated_time']
+        read_only_fields = ['phone_number', 'created_time', 'updated_time']
+
+    def get_phone_number(self, obj):
+        return obj.user.phone_number
 
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):

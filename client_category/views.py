@@ -1,58 +1,106 @@
-from rest_framework import generics, permissions
-from rest_framework.serializers import ValidationError
+from django.shortcuts import get_object_or_404
+
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from rest_framework import status
+
+from .models import CategoryModel
+from .serializers import BatchCategoryModelSerializer, CategorySerializer, CategoryUpdateSerializer, \
+    CategoryDeleteSerializer
+
 from admin_category.models import DefaultCategoryModel
 from admin_category.serializers import DefaultCategoryListClientSerializer
-from .models import CategoryModel, AccountModel
-from .serializers import CategorySerializer
+from client_account.models import AccountModel
 
 
 class CategoryListCreateView(generics.ListCreateAPIView):
+    serializer_class = BatchCategoryModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        account = get_object_or_404(AccountModel, pk=self.kwargs['account_pk'], profile__user=self.request.user)
+        return CategoryModel.objects.filter(account=account)
+
+    def create(self, request, *args, **kwargs):
+        account = get_object_or_404(AccountModel, pk=self.kwargs['account_pk'], profile__user=self.request.user)
+        serializer = self.get_serializer(data=request.data, many=True, context={'account': account})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CategoryRetrieveView(generics.RetrieveAPIView):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        account_id = self.kwargs['account_id']
-        account = AccountModel.objects.filter(id=account_id, profile__user=self.request.user).first()
-        if not account:
-            raise ValidationError("این حساب متعلق به شما نیست.")
-        return CategoryModel.objects.filter(account_id=account_id)
-
-    def perform_create(self, serializer):
-        account_id = self.kwargs['account_id']
-        account = AccountModel.objects.filter(id=account_id, profile__user=self.request.user).first()
-        if not account:
-            raise ValidationError("این حساب متعلق به شما نیست.")
-        serializer.save(account=account)
+        account = get_object_or_404(AccountModel, pk=self.kwargs['account_pk'], profile__user=self.request.user)
+        return CategoryModel.objects.filter(account=account)
 
 
-class CategoryRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = CategorySerializer
+class CategoryBatchUpdateView(generics.GenericAPIView):
+    serializer_class = CategoryUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        account_id = self.kwargs['account_id']
-        account = AccountModel.objects.filter(id=account_id, profile__user=self.request.user).first()
-        if not account:
-            raise ValidationError("این حساب متعلق به شما نیست.")
-        return CategoryModel.objects.filter(account_id=account_id)
+        account = get_object_or_404(AccountModel, pk=self.kwargs['account_pk'], profile__user=self.request.user)
+        return CategoryModel.objects.filter(account=account)
 
-    def get_object(self):
-        account_id = self.kwargs['account_id']
-        category_id = self.kwargs['pk']
-        category = CategoryModel.objects.filter(id=category_id, account_id=account_id,
-                                                account__profile__user=self.request.user).first()
-        if not category:
-            raise ValidationError("دسته بندی مورد نظر یافت نشد یا به شما تعلق ندارد.")
-        return category
+    def patch(self, request, *args, **kwargs):
+        instances = self.get_queryset()
+        instance_mapping = {instance.id: instance for instance in instances}
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.is_default:
+        data = request.data
+        print(data)
+        if not isinstance(data, list):
+            return Response({"detail": "دیتای ارسالی بایستی لیست باشد."}, status=status.HTTP_400_BAD_REQUEST)
+
+        updated_instances = []
+        errors = []
+
+        for item in data:
+            print(item)
+            category_id = item.get('id')
+            category_instance = instance_mapping.get(category_id)
+            print(category_instance)
+
+            if category_instance:
+                serializer = self.get_serializer(category_instance, data=item, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    updated_instances.append(serializer.data)
+                else:
+                    errors.append({category_id: serializer.errors})
+            else:
+                errors.append({category_id: "دسته بندی یافت نشد."})
+
+        if errors:
+            return Response({"detail": "دسته بندی آپدیت نشد.", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"updated": updated_instances}, status=status.HTTP_200_OK)
+
+
+class CategoryBatchDeleteView(generics.GenericAPIView):
+    serializer_class = CategoryDeleteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        account = get_object_or_404(AccountModel, pk=self.kwargs['account_pk'], profile__user=self.request.user)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+
+        categories_to_delete = CategoryModel.objects.filter(id__in=ids, account=account)
+
+        if not categories_to_delete.exists():
+            return Response({"detail": "دسته بندی برای پاک شدن یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+
+        default_categories = categories_to_delete.filter(is_default=True)
+        if default_categories.exists():
             return Response({"detail": "دسته بندی پیش فرض قابل حذف نمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        deleted_count, _ = categories_to_delete.delete()
+
+        return Response({"detail": f"{deleted_count} دسته بندی حذف شد"}, status=status.HTTP_200_OK)
 
 
 class ListDefaultCategoryView(generics.ListAPIView):

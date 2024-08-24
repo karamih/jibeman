@@ -3,10 +3,11 @@ import logging
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from .serializers import PhoneNumberSerializer, OtpVerificationSerializer, CustomTokenRefreshSerializer, MockSerializer
+from .serializers import PhoneNumberSerializer, OtpVerificationSerializer, CustomTokenRefreshSerializer, \
+    UserProfileDateSerializer, MockSerializer
 from utils.otp import generate_and_send_totp
 from .models import UserModel, ProfileModel, SessionModel
 
@@ -31,6 +32,14 @@ class VerifyOtpView(APIView):
             response_data = serializer.save()
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileDataView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileDateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return ProfileModel.objects.get(user=self.request.user)
 
 
 class MockAuthentication(APIView):
@@ -66,7 +75,11 @@ class MockAuthentication(APIView):
                     response_data = {
                         "detail": "کاربر با موفقیت وارد شد." if not created else "کاربر با موفقیت ایجاد شد.",
                         "refresh": str(refresh),
-                        "access": str(access_token)
+                        "access": str(access_token),
+                        "phone_number": str(phone_number),
+                        "currency_unit": str(user.profile.currency_unit),
+                        "created_time": str(user.profile.created_time),
+                        "updated_time": str(user.profile.updated_time)
                     }
                     return Response(response_data, status=status.HTTP_200_OK)
             except Exception as e:

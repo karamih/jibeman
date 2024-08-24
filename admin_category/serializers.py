@@ -7,8 +7,8 @@ class DefaultCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DefaultCategoryModel
-        fields = ['id', 'name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default', 'created_time',
-                  'updated_time']
+        fields = ['id', 'name', 'icon_name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default',
+                  'created_time', 'updated_time']
         read_only_fields = ['id', 'created_time', 'updated_time']
 
     def validate(self, data):
@@ -31,6 +31,6 @@ class DefaultCategorySerializer(serializers.ModelSerializer):
 class DefaultCategoryListClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultCategoryModel
-        fields = ['id', 'name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default', 'created_time',
+        fields = ['id', 'name', 'icon_name', 'transaction_type', 'icon_fg_color', 'icon_bg_color', 'is_default', 'created_time',
                   'updated_time']
         read_only_fields = ['id', 'created_time', 'updated_time']
