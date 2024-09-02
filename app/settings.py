@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'admin_category',
     'admin_ticket',
     'admin_bank',
+    'admin_dashboard',
 
     'client_auth',
     'client_account',
@@ -130,7 +131,7 @@ TIME_ZONE = "Asia/Tehran"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 STATIC_URL = "static/"
 MEDIA_URL = "media/"

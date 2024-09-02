@@ -11,6 +11,7 @@ urlpatterns = [
         path('', include('client_category.urls')),
         path('', include('client_bank.urls')),
         path('', include('client_notification.urls')),
+        path('', include('client_transaction.urls')),
     ])),
     path('api/admin/', include([
         path('', include('admin_auth.urls')),
@@ -19,5 +20,6 @@ urlpatterns = [
         path('', include('admin_category.urls')),
         path('', include('admin_notification.urls')),
         path('', include('admin_bank.urls')),
+        path('', include('admin_dashboard.urls')),
     ]))
 ]
