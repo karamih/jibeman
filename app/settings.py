@@ -131,7 +131,7 @@ TIME_ZONE = "Asia/Tehran"
 
 USE_I18N = True
 
-USE_TZ = False
+USE_TZ = True
 
 STATIC_URL = "static/"
 MEDIA_URL = "media/"

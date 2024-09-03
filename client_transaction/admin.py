@@ -4,8 +4,8 @@ from .models import TransactionModel
 
 @admin.register(TransactionModel)
 class TransactionModelAdmin(admin.ModelAdmin):
-    list_display = ['transaction_type', 'category', 'source', 'amount', 'transaction_level', 'fee',
-                    'date', 'created_time']
+    list_display = ['id', 'transaction_type', 'category', 'source', 'amount', 'transaction_level', 'is_fee',
+                    'date', 'time', 'created_time']
     search_fields = ['transaction_type', 'category__name', 'source__name', 'description']
     list_filter = ['transaction_type', 'category', 'date', 'created_time', 'transaction_level']
     ordering = ['date', 'created_time']

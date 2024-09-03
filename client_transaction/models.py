@@ -21,7 +21,7 @@ class TransactionModel(models.Model):
         to=CategoryModel,
         related_name='transactions',
         verbose_name='category',
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
     source = models.ForeignKey(
         to=FinancialSourceModel,
@@ -32,8 +32,8 @@ class TransactionModel(models.Model):
     )
 
     amount = models.DecimalField(max_digits=16, decimal_places=0)
-    transaction_level = models.CharField(max_length=11, default='Normal', choices=TRANSACTION_LEVEL_CHOICES)
-    fee = models.DecimalField(max_digits=16, decimal_places=0, blank=True, null=True)
+    transaction_level = models.CharField(max_length=11, choices=TRANSACTION_LEVEL_CHOICES, blank=True, null=True)
+    is_fee = models.BooleanField(default=False)
     description = models.TextField(max_length=500, blank=True, null=True)
     date = jmodels.jDateField()
     time = models.TimeField(blank=True, null=True)

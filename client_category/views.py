@@ -50,7 +50,6 @@ class CategoryBatchUpdateView(generics.GenericAPIView):
         instance_mapping = {instance.id: instance for instance in instances}
 
         data = request.data
-        print(data)
         if not isinstance(data, list):
             return Response({"detail": "دیتای ارسالی بایستی لیست باشد."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,10 +57,8 @@ class CategoryBatchUpdateView(generics.GenericAPIView):
         errors = []
 
         for item in data:
-            print(item)
             category_id = item.get('id')
             category_instance = instance_mapping.get(category_id)
-            print(category_instance)
 
             if category_instance:
                 serializer = self.get_serializer(category_instance, data=item, partial=True)
